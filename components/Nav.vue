@@ -4,85 +4,12 @@
         style="width: 2rem"></a>
 
     <div id="menu">
-      <!-- <ul class="d-flex mb-0"> -->
       <root />
-      <!-- <li class="nav-item dropdown">
-          <a class="nav-link lh-3rem" href="#">Man</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link disabled lh-3rem" href="#">Women</a>
-          <ul class="dropdown-menu-1 flex-wrap justify-content-center">
-            <li>
-              <a class="dropdown-item" href="#">Women Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Women action</a></li>
-                <li><a class="dropdown-item" href="#">Women action</a></li>
-                <li><a class="dropdown-item" href="#">Women action</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle-1 lh-3rem" href="#">Kids</a>
-          <ul class="dropdown-menu-1 1 flex-wrap justify-content-center">
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Action</a>
-              <ul>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li> -->
-      <!-- </ul> -->
     </div>
     <div id="overlay">
       <div id="mobile-sidebar" class="">
         <a href="javascript:void(0)" class="closebtn" @click="closeNav">&times;</a>
-        <a href="#">About</a>
-        <a href="#">Services</a>
-        <a href="#">Clients</a>
+        <div v-for="item in s" :key="item.id" @click="childClick">{{ item.name }}</div>
         <a href="#">Contact</a>
       </div>
     </div>
@@ -131,13 +58,32 @@ function closeNav() {
   document.getElementById("mobile-sidebar").style.width = "0";
   document.getElementById("overlay").style.width = "0";
 }
-
+function childClick() {
+  alert('ss');
+}
 let root;
+let s;
 const forest = (xs, build, isChild, root) => xs.filter(x => isChild(root, x)).map(node => build(node, root => forest(xs, build, isChild, root)));
 try {
-  const { data } = await ShopRepository.findTags();
-  console.log(data);
-  let s = forest(
+  // const { data } = await ShopRepository.findTags();
+  // console.log(data);
+  let data = [
+    { id: 1, name: 'Man', fatherId: null, andCondition: null },
+    { id: 2, name: 'Women', fatherId: null, andCondition: null },
+    { id: 3, name: 'Kid', fatherId: null, andCondition: null },
+    { id: 4, name: 'Shop By Sport', fatherId: 1, andCondition: null },
+    { id: 5, name: 'Shoes', fatherId: 1, andCondition: null },
+    { id: 6, name: 'Clothing', fatherId: 1, andCondition: null },
+    { id: 7, name: 'Color', fatherId: 1, andCondition: true },
+    { id: 8, name: 'Price', fatherId: 1, andCondition: true },
+    { id: 9, name: 'Red', fatherId: 7, andCondition: null },
+    { id: 10, name: 'Green', fatherId: 7, andCondition: null },
+    { id: 11, name: 'Blue', fatherId: 7, andCondition: null },
+    { id: 12, name: 'Running', fatherId: 4, andCondition: null },
+    { id: 13, name: 'Football', fatherId: 4, andCondition: null }
+  ];
+
+  s = forest(
     data,
     ({ id, fatherId, ...rest }, f) => ({ id, ...rest, children: f(id) }),
     (id, { fatherId }) => fatherId == id,
@@ -145,31 +91,27 @@ try {
   )
   console.log(s);
 
-  root = () => {
-    if (s.children.length) {
-      return h('ul', this.items.map(function (item) {
-        return h('li', item.name)
-      }))
-    } else {
-      return h('p', 'No items found.')
-    }
-  }
-
   root = h('ul', { class: 'd-flex mb-0' }, [s.map(item => {
-    return h('li', { class: 'nav-item dropdown' }, [
-      h(NuxtLink, { to: '/' + item.id }, () => [item.name]),
+    return h('li', { class: 'dropdown ms-3' }, [
+      h(NuxtLink, { to: '/list/' + item.id, class: 'text-black hover-line' }, [item.name]),
       (item.children.length > 0 && item.andCondition != true) ?
-        h('ul', { class: 'dropdown-menu-1 flex-wrap justify-content-center' }, [item.children.map(i => {
-          return h('li', { class: 'nav-item dropdown' }, [
-            (i.andCondition != true) ?
-              h(NuxtLink, { to: '/' + i.id }, () => [i.name]) : null,
-            (i.children.length > 0 && i.andCondition != true) ?
-              h('ul', { class: 'dropdown-menu-1 flex-wrap justify-content-center' }, [i.children.map(i => {
-                return h('li', { class: 'nav-item dropdown' }, [
-                  h(NuxtLink, { to: '/' + i.id }, () => [i.name]),
-                ])
-              })]) : null
-          ])
+        h('ul', { class: 'dropdown-menu-1 flex-wrap justify-content-center align-items-start border-bottom' }, [item.children.map(i => {
+          if (i.andCondition == true) return null;
+          else
+            return h('li', { class: 'm-2', style: { width: '150px' } }, [
+              h(NuxtLink, { to: '/list/' + i.id, class: 'text-black' }, [i.name]),
+
+
+              (i.children.length > 0 && i.andCondition != true) ?
+                h('ul', [i.children.map(i => {
+                  return h('li', { class: ' ' }, [
+                    h(NuxtLink, { to: '/list/' + i.id, class: 'text-black-50' }, [i.name])
+                  ])
+                })])
+                : null
+
+            ])
+
         })]) : null
 
     ])
@@ -182,6 +124,20 @@ try {
 
 </script>
 <style scoped>
+:deep(.hover-line:hover) {
+  font-weight: bold;
+}
+
+:deep(ul) {
+  padding: 0;
+  list-style-type: none;
+}
+
+:deep(a) {
+  text-decoration: none;
+}
+
+
 #overlay {
   width: 0;
   height: 100vh;
@@ -231,20 +187,16 @@ try {
   border-color: white;
 }
 
-ul {
-  list-style-type: none;
-}
-
 .lh-3rem {
   line-height: 3rem;
 }
 
-.dropdown:hover .dropdown-menu-1 {
+:deep(.dropdown:hover .dropdown-menu-1) {
   display: flex;
   margin-top: 0;
 }
 
-.dropdown-menu-1 {
+:deep(.dropdown-menu-1) {
   position: fixed;
   display: none;
   width: 100vw;
